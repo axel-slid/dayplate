@@ -1,0 +1,22 @@
+{
+  "name": "dayplate",
+  "version": "0.1.0",
+  "description": "A calm, local-first calorie journal",
+  "main": "main.cjs",
+  "private": true,
+  "bin": {"dayplate":"cli.cjs", "openplate":"cli.cjs"},
+  "scripts": {
+    "start": "electron .",
+    "cli": "node cli.cjs",
+    "test": "node --test tests/*.test.cjs",
+    "test:ui": "node tests/smoke.cjs && node tests/analytics-ui.cjs && node tests/workouts-ui.cjs",
+    "screenshots": "node scripts/screenshots.cjs",
+    "package": "electron-packager . Dayplate --platform=darwin --out=dist --icon=assets/dayplate.icns --overwrite --app-bundle-id=local.dayplate.app --ignore=\"^/(tests|scripts|dist|build-cli|backups|journal-updates|ios)(/|$)|^/[^/]+[.]png$\""
+  },
+  "devDependencies": {
+    "@electron/packager": "^20.3.0",
+    "@playwright/test": "^1.63.0",
+    "electron": "^44.4.3",
+    "sharp": "^0.35.4"
+  }
+}
