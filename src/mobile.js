@@ -5,7 +5,7 @@ function renderMobileJournal(){
   if(mobileJournalDate!==date){mobileJournalDate=date;mobileJournalPage=0;}
   const entries=state.entries.filter(e=>e.date===date);
   mobileJournalPage=Math.min(mobileJournalPage,Math.max(0,Math.ceil(entries.length/3)-1));
-  $('#mobile-journal').innerHTML=`<div class="section-heading"><h2>Meals</h2><button class="primary mobile-add" data-mobile-food aria-label="Add food">＋</button></div><div class="mobile-day-list">${entries.slice(mobileJournalPage*3,mobileJournalPage*3+3).map(e=>`<button class="mobile-entry" data-action="edit-entry" data-id="${esc(e.id)}"><span class="entry-emoji">${foodIcon(e.meal.emoji)}</span><span><strong>${esc(e.meal.name)}</strong><small>${esc(e.category)}</small></span><b>${fmt(entryCalories(e))}<small>kcal</small></b><span aria-hidden="true">↗</span></button>`).join('')||'<div class="mobile-empty">—</div>'}</div>${pager('journal',mobileJournalPage,entries.length,3)}<div class="mobile-day-actions"><button data-view="workouts" title="Workouts" aria-label="View workouts"><svg viewBox="0 0 24 24"><path d="M7 8v8m10-8v8M4 10v4m16-4v4M7 12h10"/></svg><span>${(state.workouts||[]).filter(w=>w.date===date).length}</span></button><button data-new-workout aria-label="Log workout">＋</button></div>`;
+  $('#mobile-journal').innerHTML=`<div class="section-heading"><h2>Meals</h2><button class="primary mobile-add" data-mobile-food aria-label="Add food">＋</button></div><div class="mobile-day-list">${entries.slice(mobileJournalPage*3,mobileJournalPage*3+3).map(e=>`<button class="mobile-entry" data-action="edit-entry" data-id="${esc(e.id)}"><span class="entry-emoji">${foodIcon(e.meal.emoji)}</span><span><strong>${esc(e.meal.name)}</strong><small>${esc(e.category)}</small></span><b>${fmt(entryCalories(e))}<small>kcal</small></b><span aria-hidden="true">↗</span></button>`).join('')||'<div class="mobile-empty">—</div>'}</div>${pager('journal',mobileJournalPage,entries.length,3)}`;
 }
 function mobileFoodPicker(category='Lunch'){
   let tab='meals',page=0;
@@ -33,5 +33,5 @@ function renderMobileMealPages(){
   target.innerHTML=pager('meals',mobileMealPage,count,4);
 }
 $('#meal-search').addEventListener('input',()=>{mobileMealPage=0;renderLibrary();renderMobileMealPages();});
-window.addEventListener('resize',()=>{renderLibrary();renderMobileMealPages();renderMobileJournal();if(view==='analytics')renderAnalytics();if(view==='workouts')renderWorkouts();});
+window.addEventListener('resize',()=>{renderLibrary();renderMobileMealPages();renderMobileJournal();if(view==='analytics')renderAnalytics();});
 renderMobileJournal();renderMobileMealPages();

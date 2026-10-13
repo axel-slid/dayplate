@@ -41,15 +41,25 @@ function save() {
 function toast(message) { $('#toast').textContent=message; $('#toast').classList.add('visible'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>$('#toast').classList.remove('visible'),3000); }
 function commit(message) { if(save()) toast(message); render(); }
 function dayTitle() { return new Date(date+'T12:00:00').toLocaleDateString(undefined, {weekday:'long'}); }
+function renderNutritionPie(selector, value, goal) {
+  const ratio = goal > 0 ? Math.max(0, Math.min(value / goal, 1)) : 0;
+  let sector = '';
+  if (ratio === 1) {
+    sector = 'M 90 14 A 76 76 0 1 1 90 166 A 76 76 0 1 1 90 14 Z';
+  } else if (ratio > 0) {
+    const angle = ratio * Math.PI * 2 - Math.PI / 2;
+    const x = 90 + 76 * Math.cos(angle), y = 90 + 76 * Math.sin(angle);
+    sector = `M 90 90 L 90 14 A 76 76 0 ${ratio > .5 ? 1 : 0} 1 ${x} ${y} Z`;
+  }
+  $(selector).setAttribute('d', sector);
+}
 function render() {
   if (view === 'journal') $('#page-title').textContent = dayTitle();
   const entries = state.entries.filter(e=>e.date===date), total=entries.reduce((s,e)=>s+entryCalories(e),0);
   $('#journal-date').value=date; $('#consumed').textContent=fmt(total); $('#goal-label').textContent=state.goal?fmt(state.goal):'—'; $('#edit-goal').title=state.goal?'Edit goal':'Set goal';
   $('#remaining').textContent=!state.goal?'—':total<=state.goal?`${fmt(state.goal-total)} kcal remaining`:`+${fmt(total-state.goal)} kcal`;
-  const ratio=state.goal?Math.min(total/state.goal,1):0;
-  $('#calorie-ring-fill').style.strokeDashoffset=1-ratio;$('#calorie-ring-fill').style.opacity=ratio>0?1:0;
+  renderNutritionPie('#calorie-ring-fill', total, state.goal);
   $('.calorie-ring').setAttribute('aria-label',`${fmt(total)} kcal eaten${state.goal?`, target ${fmt(state.goal)} kcal`:''}`);
-  $('.calorie-ring-wrap').classList.toggle('over-goal',Boolean(state.goal&&total>state.goal));
   $('#progress-fill').style.width=`${state.goal?Math.min(total/state.goal*100,100):0}%`;
   $('#logged-count').textContent=`${entries.length} meal${entries.length===1?'':'s'} logged`;
   $('#meal-count').textContent=state.meals.length;
@@ -57,7 +67,7 @@ function render() {
   $('#protein-goal').textContent=state.proteinGoal;
   const protein=entries.reduce((sum,e)=>sum+entryProtein(e),0);
   $('#protein-remaining').textContent=protein<=state.proteinGoal?`${Number((state.proteinGoal-protein).toFixed(1))} g remaining`:`${Number((protein-state.proteinGoal).toFixed(1))} g above goal`;
-  $('#protein-ring-fill').style.strokeDashoffset=1-Math.min(protein/(state.proteinGoal||1),1);$('#protein-ring-fill').style.opacity=protein>0?1:0;
+  renderNutritionPie('#protein-ring-fill', protein, state.proteinGoal);
   $('.protein-ring').setAttribute('aria-label',`${Number(protein.toFixed(1))} g protein, target ${state.proteinGoal} g`);
   $('#protein-note').textContent=entries.some(e=>missingProtein(e.meal))?'?':'';
   const hasCarbs=entries.some(e=>!missingCarbs(e.meal)), hasFat=entries.some(e=>!missingFat(e.meal));
@@ -73,15 +83,13 @@ function render() {
   $('#quick-meals').innerHTML=state[foodTab].map(m=>`<div class="quick-meal" draggable="true" data-drag-kind="meal" data-drag-id="${m.id}" title="Drag to a meal"><div class="food-icon">${foodIcon(m.emoji)}</div><div><strong>${esc(m.name)}</strong><small>${m.isFood?esc(m.ingredients[0].unit):esc(m.source||m.category)} · ${fmt(mealCalories(m))} kcal · ${Number(mealProtein(m).toFixed(1))} g protein${missingProtein(m)?' + ?':''}</small></div>${m.isFood?`<button data-action="edit-food" data-id="${m.id}" aria-label="Edit ${esc(m.name)}">✎</button>`:''}<button data-action="log" data-id="${m.id}" aria-label="Log ${esc(m.name)}">＋</button></div>`).join('') || '<p class="muted">Save your first meal.</p>';
   renderLibrary();
   if (view === 'analytics') renderAnalytics();
-  if (view === 'workouts') renderWorkouts();
-  if (typeof renderWorkoutDay === 'function') renderWorkoutDay();
   if (typeof renderMobileJournal === 'function') renderMobileJournal();
 }
 function renderLibrary() {
   const term=$('#meal-search').value.toLowerCase();
   $('#meal-library').innerHTML=state.meals.filter(m=>m.name.toLowerCase().includes(term)).filter((m,i)=>typeof mobileMealPage==='undefined'||!window.matchMedia('(max-width:700px)').matches||Math.floor(i/4)===mobileMealPage).map(m=>`<article class="meal-card"><div class="food-icon">${foodIcon(m.emoji)}</div><h3>${esc(m.name)}</h3><p>${esc(m.source||m.category)} · ${fmt(mealCalories(m))} kcal · ${Number(mealProtein(m).toFixed(1))} g protein${missingProtein(m)?' + ?':''} per serving<br>${m.ingredients.map(i=>esc(i.name)).join(' · ')}</p><div class="actions"><button class="text-button" data-action="edit-meal" data-id="${m.id}">Edit</button><button class="text-button" data-action="delete-meal" data-id="${m.id}">Delete</button><button class="primary" data-action="log" data-id="${m.id}">＋ Log</button></div></article>`).join('') || '<p class="muted">No meals found. Create one to get started.</p>';
 }
-function switchView(next) { view=next; for (const name of ['journal','meals','analytics','workouts']) $(`#${name}-view`).hidden=view!==name; document.querySelectorAll('.nav').forEach(n=>n.classList.toggle('active',n.dataset.view===view)); $('#page-title').textContent=view==='journal'?dayTitle():view==='analytics'?'Analytics':view==='workouts'?'Workouts':'Meals'; $('#header-add').hidden=!['meals','workouts'].includes(view); $('#header-add').textContent=view==='workouts'?'＋ Workout':'＋ Meal'; if(view==='analytics')renderAnalytics(); if(view==='workouts')renderWorkouts(); window.scrollTo(0,0); }
+function switchView(next) { view=next; for (const name of ['journal','meals','analytics']) $(`#${name}-view`).hidden=view!==name; document.querySelectorAll('.nav').forEach(n=>n.classList.toggle('active',n.dataset.view===view)); $('#page-title').textContent=view==='journal'?dayTitle():view==='analytics'?'Analytics':'Meals'; $('#header-add').hidden=view!=='meals'; $('#header-add').textContent='＋ Meal'; if(view==='analytics')renderAnalytics(); window.scrollTo(0,0); }
 function modal(title, body) { $('#modal-content').innerHTML=`<div class="modal-header"><h2>${title}</h2><button class="icon-button" data-action="close" aria-label="Close dialog">×</button></div>${body}`; if(!$('#modal').open) $('#modal').showModal(); }
 function close() { $('#modal').close(); }
 function options(selected) { return categories.map(c=>`<option ${c===selected?'selected':''}>${c}</option>`).join(''); }
@@ -125,7 +133,7 @@ document.addEventListener('click', event=>{
  if(action==='delete-entry'){state.entries=state.entries.filter(x=>x.id!==id);commit('Meal removed from this day');}
  if(action==='delete-meal') {state.meals=state.meals.filter(x=>x.id!==id);commit('Saved meal removed');}
 });
-$('#header-add').onclick=()=>view==='workouts'?editWorkout(null,dateKey()):view==='journal'?chooseMeal():editMeal();$('#new-meal').onclick=()=>foodTab==='foods'?editFood():editMeal();
+$('#header-add').onclick=()=>view==='journal'?chooseMeal():editMeal();$('#new-meal').onclick=()=>foodTab==='foods'?editFood():editMeal();
 $('#meal-search').oninput=renderLibrary;
 $('#journal-date').onchange=e=>{if(e.target.value){date=e.target.value;render();}};
 function moveDate(offset){const d=new Date(date+'T12:00:00');d.setDate(d.getDate()+offset);date=dateKey(d);render();}

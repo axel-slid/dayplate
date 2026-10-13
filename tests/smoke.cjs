@@ -13,7 +13,7 @@ const path=require('node:path');
  await page.screenshot({path:path.join(__dirname,'../preview.png')});
  await page.getByRole('button',{name:'Log Kraft mac & cheese',exact:true}).click();
  await page.locator('#servings').fill('0.5');assert.equal(await page.locator('#portion-calories').textContent(),'550 kcal');
- await page.locator('#log-form .primary').click();assert.equal(await page.locator('#consumed').textContent(),'550');assert.ok(Math.abs(Number(await page.locator('#calorie-ring-fill').evaluate(el=>el.style.strokeDashoffset))-(1-550/3000))<0.00001);
+ await page.locator('#log-form .primary').click();assert.equal(await page.locator('#consumed').textContent(),'550');assert.match(await page.locator('#calorie-ring-fill').getAttribute('d'), /^M 90 90 L 90 14 A 76 76/);
  await page.getByRole('button',{name:'Edit Kraft mac & cheese',exact:true}).click();await page.locator('#servings').fill('1');await page.locator('#log-form .primary').click();assert.equal(await page.locator('#consumed').textContent(),'1,100');
  await page.locator('#prev-date').click();assert.equal(await page.locator('#consumed').textContent(),'0');await page.locator('#today').click();assert.equal(await page.locator('#consumed').textContent(),'1,100');
  await page.locator('#edit-goal').click();await page.locator('#goal-input').fill('3000');await page.locator('#goal-form .primary').click();assert.equal(await page.locator('#remaining').textContent(),'1,900 kcal remaining');

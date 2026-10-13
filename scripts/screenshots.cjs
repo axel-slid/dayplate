@@ -66,31 +66,24 @@ const Store = require('../lib/store.cjs');
     assert.equal(await page.locator('.mobile-entry').count(), 1);
     await page.getByRole('button', {name: 'Analytics', exact: true}).click();
     await shot('mobile-analytics'); await fits();
-    await page.locator('[data-analytics-pane="history"]').click();
-    await page.waitForTimeout(500); await fits();
-    assert.equal(await page.locator('.analytics-history tbody tr').count(), 5);
     await page.locator('[data-analytics-pane="weight"]').click();
     await shot('mobile-weight'); await fits();
-    await page.getByRole('button', {name: 'Workouts', exact: true}).click();
-    await shot('mobile-workouts'); await fits();
-    await page.getByRole('button', {name: 'Next workouts', exact: true}).click();
-    assert.equal(await page.locator('#workouts-view .workout-card').count(), 3);
     await page.getByRole('button', {name: 'Meals', exact: true}).click();
     await page.waitForTimeout(500); await fits();
     // Exercise the space reserved for an iPhone's status bar and home indicator.
     const css = await fs.readFile(path.join(__dirname, '..', 'src', 'polish.css'), 'utf8');
     await page.addStyleTag({content: css.replaceAll('env(safe-area-inset-top)', '59px').replaceAll('env(safe-area-inset-bottom)', '34px')});
-    for (const name of ['Journal', 'Meals', 'Workouts', 'Analytics']) {
+    for (const name of ['Journal', 'Meals', 'Analytics']) {
       await page.getByRole('button', {name, exact: true}).click();
       if (name === 'Journal') await page.locator('[data-mobile-page="journal"][data-page-step="-1"]').click();
       await page.waitForTimeout(500); await fits();
     }
-    for (const pane of ['intake', 'history', 'weight']) {
+    for (const pane of ['intake', 'weight']) {
       await page.locator(`[data-analytics-pane="${pane}"]`).click();
       await page.waitForTimeout(500); await fits();
     }
     assert.deepEqual(errors, []);
-    console.log('Saved six screenshots with fictional data; populated phone pages fit without vertical scrolling.');
+    console.log('Saved five screenshots with fictional data; populated phone pages fit without vertical scrolling.');
   } finally {
     if (app) await app.close();
     await fs.rm(directory, {recursive: true, force: true});
