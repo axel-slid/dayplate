@@ -10,3 +10,4 @@
 
 @media(max-width:700px) and (max-height:900px){#journal-view .calorie-ring-wrap{width:min(30vw,116px);height:min(30vw,116px)}#journal-view .summary{padding:12px 8px;margin-bottom:10px}#journal-view .daily-details{padding:9px;margin-bottom:12px}#journal-view .mobile-entry{height:48px;padding:7px 0}}/* Filled goal pies with totals underneath,on desktop and phone. */
 .calorie-ring-wrap{height:auto!important}.nutrition-pie{display:block;height:auto;aspect-ratio:1;overflow:hidden}.calorie-ring-value{margin:2px 0 12px}.nutrition-pie circle,.nutrition-pie path{stroke:none}.nutrition-pie-fill{fill:#edc444}
+@media(max-width:700px){#journal-view .calorie-ring-wrap{width:min(28vw,108px)}.calorie-ring-value{margin-bottom:4px}.protein-summary{padding-bottom:0}}
