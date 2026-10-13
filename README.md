@@ -1,11 +1,11 @@
 # Dayplate
 
-A local food and weight journal for Mac and iPhone. Warm colors, yellow nutrition pie charts, and compact phone screens.
+A local food and weight journal for Mac and iPhone. Warm colors, yellow circular nutrition charts, and compact phone screens.
 
 ![Dayplate desktop journal](screenshots/desktop-journal.png)
 
 <p>
-  <img src="screenshots/mobile-journal.png" width="23%" alt="iPhone journal with calorie and protein pie charts">
+  <img src="screenshots/mobile-journal.png" width="23%" alt="iPhone journal with calorie and protein progress rings">
   <img src="screenshots/mobile-analytics.png" width="23%" alt="iPhone nutrition averages and intake chart">
   <img src="screenshots/mobile-weight.png" width="23%" alt="iPhone weight trend and weigh-ins">
 </p>
@@ -14,7 +14,7 @@ A local food and weight journal for Mac and iPhone. Warm colors, yellow nutritio
 
 ## Features
 
-- Yellow calorie and protein pie charts with editable daily targets; carbs and fat totals.
+- Yellow calorie and protein progress rings with editable daily targets; carbs and fat totals.
 - Saved recipes, ingredients, fractional portions, and dated meal logs.
 - Nutrition averages, total history, target counts, and daily charts across 7 days, 30 days, or all history.
 - Weight trends in lb or kg, with editable weigh-ins.

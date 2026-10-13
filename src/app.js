@@ -41,24 +41,18 @@ function save() {
 function toast(message) { $('#toast').textContent=message; $('#toast').classList.add('visible'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>$('#toast').classList.remove('visible'),3000); }
 function commit(message) { if(save()) toast(message); render(); }
 function dayTitle() { return new Date(date+'T12:00:00').toLocaleDateString(undefined, {weekday:'long'}); }
-function renderNutritionPie(selector, value, goal) {
+function renderNutritionRing(selector, value, goal) {
   const ratio = goal > 0 ? Math.max(0, Math.min(value / goal, 1)) : 0;
-  let sector = '';
-  if (ratio === 1) {
-    sector = 'M 90 14 A 76 76 0 1 1 90 166 A 76 76 0 1 1 90 14 Z';
-  } else if (ratio > 0) {
-    const angle = ratio * Math.PI * 2 - Math.PI / 2;
-    const x = 90 + 76 * Math.cos(angle), y = 90 + 76 * Math.sin(angle);
-    sector = `M 90 90 L 90 14 A 76 76 0 ${ratio > .5 ? 1 : 0} 1 ${x} ${y} Z`;
-  }
-  $(selector).setAttribute('d', sector);
+  const ring = $(selector);
+  ring.style.strokeDashoffset = 1 - ratio;
+  ring.style.opacity = ratio > 0 ? 1 : 0;
 }
 function render() {
   if (view === 'journal') $('#page-title').textContent = dayTitle();
   const entries = state.entries.filter(e=>e.date===date), total=entries.reduce((s,e)=>s+entryCalories(e),0);
   $('#journal-date').value=date; $('#consumed').textContent=fmt(total); $('#goal-label').textContent=state.goal?fmt(state.goal):'—'; $('#edit-goal').title=state.goal?'Edit goal':'Set goal';
   $('#remaining').textContent=!state.goal?'—':total<=state.goal?`${fmt(state.goal-total)} kcal remaining`:`+${fmt(total-state.goal)} kcal`;
-  renderNutritionPie('#calorie-ring-fill', total, state.goal);
+  renderNutritionRing('#calorie-ring-fill', total, state.goal);
   $('.calorie-ring').setAttribute('aria-label',`${fmt(total)} kcal eaten${state.goal?`, target ${fmt(state.goal)} kcal`:''}`);
   $('#progress-fill').style.width=`${state.goal?Math.min(total/state.goal*100,100):0}%`;
   $('#logged-count').textContent=`${entries.length} meal${entries.length===1?'':'s'} logged`;
@@ -67,7 +61,7 @@ function render() {
   $('#protein-goal').textContent=state.proteinGoal;
   const protein=entries.reduce((sum,e)=>sum+entryProtein(e),0);
   $('#protein-remaining').textContent=protein<=state.proteinGoal?`${Number((state.proteinGoal-protein).toFixed(1))} g remaining`:`${Number((protein-state.proteinGoal).toFixed(1))} g above goal`;
-  renderNutritionPie('#protein-ring-fill', protein, state.proteinGoal);
+  renderNutritionRing('#protein-ring-fill', protein, state.proteinGoal);
   $('.protein-ring').setAttribute('aria-label',`${Number(protein.toFixed(1))} g protein, target ${state.proteinGoal} g`);
   $('#protein-note').textContent=entries.some(e=>missingProtein(e.meal))?'?':'';
   const hasCarbs=entries.some(e=>!missingCarbs(e.meal)), hasFat=entries.some(e=>!missingFat(e.meal));

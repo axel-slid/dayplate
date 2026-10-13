@@ -15,8 +15,8 @@ const Store=require('../lib/store.cjs');const Model=require('../src/model.js');
   assert.equal(await page.locator('[data-view="workouts"], #journal-workouts, .movement-analytics, .analytics-history').count(),0);
   await page.getByRole('button',{name:'Journal',exact:true}).click();
   assert.equal(await page.locator('#consumed').textContent(),'0');
-  assert.equal(await page.locator('#calorie-ring-fill').getAttribute('d'),'');
-  assert.equal(await page.locator('#protein-ring-fill').getAttribute('d'),'');
+  assert.equal(await page.locator('#calorie-ring-fill').evaluate(el=>el.style.opacity),'0');
+  assert.equal(await page.locator('#protein-ring-fill').evaluate(el=>el.style.opacity),'0');
   await app.evaluate(({BrowserWindow})=>{const win=BrowserWindow.getAllWindows()[0];win.setMinimumSize(320,500);win.setSize(390,844);});
   await page.waitForTimeout(300);
   assert.equal(await page.locator('.nav').count(),3);
@@ -26,6 +26,6 @@ const Store=require('../lib/store.cjs');const Model=require('../src/model.js');
   assert.match(await page.locator('#analytics-latest-weight').textContent(),/170/);
   assert.equal(await page.locator('.weight-analytics').isVisible(),true);
   assert.deepEqual(errors,[]);
-  console.log('Passed: weight with no food logs, empty nutrition pies, simplified desktop and phone navigation.');
+  console.log('Passed: weight with no food logs, empty nutrition rings, simplified desktop and phone navigation.');
  }finally{if(app)await app.close();await fs.rm(data,{recursive:true,force:true});}
 })().catch(error=>{console.error(error);process.exitCode=1;});
